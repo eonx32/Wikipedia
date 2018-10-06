@@ -76,7 +76,7 @@ public class QueryManager extends Handler{
                     public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
                         if(response.code() == 200) {
                             if(mResponseListener != null)
-                                mResponseListener.onResponseReceived(response.body());
+                                mResponseListener.onResponseReceived(SEND_QUERY, response.body());
                         } else {
                             try {
                                 WikiLog.e(TAG, "Error : "+response.errorBody().string());
@@ -100,11 +100,11 @@ public class QueryManager extends Handler{
         HashMap<String, String> queries = new HashMap<>();
         queries.put("action","query");
         queries.put("format","json");
-        queries.put("prop","pageimages|pageterms");
+        queries.put("prop","pageimages|pageterms|info");
         queries.put("generator","prefixsearch");
-        queries.put("redirects","1");
         queries.put("formatversion","2");
         queries.put("piprop","thumbnail");
+        queries.put("inprop","url");
         queries.put("pithumbsize","50");
         queries.put("pilimit","10");
         queries.put("wbptterms","description");
@@ -114,6 +114,6 @@ public class QueryManager extends Handler{
     }
 
     public interface OnResponseListener {
-        void onResponseReceived(Response response);
+        void onResponseReceived(int what, Response response);
     }
 }

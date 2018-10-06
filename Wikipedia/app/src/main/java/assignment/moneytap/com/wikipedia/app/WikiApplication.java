@@ -6,14 +6,18 @@ import assignment.moneytap.com.wikipedia.client.QueryManager;
 
 public class WikiApplication extends Application{
 
-    private static WikiApplication mInstance = null;
+    private static WikiApplication sInstance = null;
 
-    private WikiApplication() { }
+    public WikiApplication() { }
 
     public static WikiApplication getInstance() {
-        if(mInstance == null)
-            mInstance = new WikiApplication();
-        return mInstance;
+        return sInstance;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        sInstance = this;
     }
 
     @Override

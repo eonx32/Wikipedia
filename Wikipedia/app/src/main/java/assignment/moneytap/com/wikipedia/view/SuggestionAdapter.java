@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
@@ -47,6 +48,7 @@ public class SuggestionAdapter extends CursorAdapter {
 
     static class SuggestionHolder extends RecyclerView.ViewHolder {
 
+        protected ConstraintLayout layout;
         protected AppCompatImageView icon;
         protected AppCompatTextView title;
         protected AppCompatTextView desc;
@@ -54,15 +56,18 @@ public class SuggestionAdapter extends CursorAdapter {
         public SuggestionHolder(View itemView) {
             super(itemView);
 
+            layout = itemView.findViewById(R.id.root_layout);
             icon = itemView.findViewById(R.id.icon);
             title = itemView.findViewById(R.id.title);
             desc = itemView.findViewById(R.id.desc);
         }
     }
 
-    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-        AppCompatImageView bmImage;
-        public DownloadImageTask(AppCompatImageView bmImage) {
+    private static class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+
+        private AppCompatImageView bmImage;
+
+        DownloadImageTask(AppCompatImageView bmImage) {
             this.bmImage = bmImage;
         }
 
