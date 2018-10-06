@@ -79,12 +79,14 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     public boolean onSuggestionClick(int position) {
         Cursor cursor= searchView.getSuggestionsAdapter().getCursor();
         cursor.moveToPosition(position);
+        String icon = cursor.getString(1);
         String title = cursor.getString(2);
         String url = cursor.getString(4);
         searchView.setQuery(title,true);
         Intent intent = new Intent(getApplicationContext(), WikiPageActivity.class);
         intent.putExtra("url", url);
         intent.putExtra("title", title);
+        intent.putExtra("icon", icon);
         startActivity(intent);
         return true;
     }
