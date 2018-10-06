@@ -18,7 +18,7 @@ public class QueryManager extends Handler{
 
     private static final String TAG = "QueryManager";
     private static final String QUERY = "query";
-    private static final int SEND_QUERY = 101;
+    public static final int SEND_QUERY = 101;
 
     private static QueryManager mInstance = null;
     private OnResponseListener mResponseListener;
@@ -46,14 +46,19 @@ public class QueryManager extends Handler{
         WikiLog.d(TAG, "Listener deregistered : "+mResponseListener.getClass().getSimpleName());
     }
 
-    public void scheduleQuery(String query) {
+    public void scheduleQuery(int what, String query) {
         if(mResponseListener!=null) {
-            removeMessages(SEND_QUERY);
-            Message msg = obtainMessage(SEND_QUERY);
-            Bundle data = new Bundle();
-            data.putString(QUERY, query);
-            msg.setData(data);
-            handleMessage(msg);
+            switch (what) {
+                case SEND_QUERY: {
+                    removeMessages(SEND_QUERY);
+                    Message msg = obtainMessage(SEND_QUERY);
+                    Bundle data = new Bundle();
+                    data.putString(QUERY, query);
+                    msg.setData(data);
+                    handleMessage(msg);
+                }
+                break;
+            }
         }
     }
 

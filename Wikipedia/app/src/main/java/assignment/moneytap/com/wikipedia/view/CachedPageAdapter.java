@@ -1,57 +1,62 @@
 package assignment.moneytap.com.wikipedia.view;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.widget.CursorAdapter;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import assignment.moneytap.com.wikipedia.R;
-import assignment.moneytap.com.wikipedia.Util.WikiConstants.ColumnType;
 import assignment.moneytap.com.wikipedia.Util.WikiLog;
+import assignment.moneytap.com.wikipedia.data.Page;
 
-public class SuggestionAdapter extends CursorAdapter {
+public class CachedPageAdapter extends ArrayAdapter<Page> {
 
-    public SuggestionAdapter(Context context, Cursor c, boolean autoRequery) {
-        super(context, c, autoRequery);
+    private Context mContext;
+
+    public CachedPageAdapter(@NonNull Context context, ArrayList<Page> pages) {
+        super(context, R.layout.item_page, pages);
+        this.mContext = context;
     }
 
     @Override
-    public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_page, viewGroup, false);
-        return view;
+    public View getView(int i, View view, ViewGroup viewGroup) {
+        View v = view;
+        if(v == null) {
+            v = LayoutInflater.from(mContext).inflate(R.layout.item_page,
+                    viewGroup,
+                    false);
+        }
+
+        ItemHolder holder = new ItemHolder(v);
+
+        Page page = getItem(i);
+        String imageUrl = page.getThumbnail().getSource();
+        if(imageUrl != null)
+            new DownloadImageTask(holder.icon).execute(imageUrl);
+        holder.title.setText(page.getTitle());
+        holder.desc.setText(page.getTerms().getDescription().get(0));
+
+        return v;
     }
 
-    @Override
-    public void bindView(View view, Context context, Cursor cursor) {
-
-        if(view == null)
-            return ;
-
-        SuggestionHolder holder = new SuggestionHolder(view);
-
-        String imageUrl = cursor.getString(ColumnType.ICON.ordinal());
-        new DownloadImageTask(holder.icon).execute(imageUrl);
-        holder.title.setText(cursor.getString(ColumnType.TITLE.ordinal()));
-        holder.desc.setText(cursor.getString(ColumnType.DESC.ordinal()));
-    }
-
-    static class SuggestionHolder extends RecyclerView.ViewHolder {
+    static class ItemHolder extends RecyclerView.ViewHolder {
 
         protected ImageView icon;
         protected TextView title;
         protected TextView desc;
 
-        public SuggestionHolder(View itemView) {
+        public ItemHolder(View itemView) {
             super(itemView);
 
             icon = itemView.findViewById(R.id.icon);

@@ -3,6 +3,7 @@ package assignment.moneytap.com.wikipedia.app;
 import android.app.Application;
 
 import assignment.moneytap.com.wikipedia.client.QueryManager;
+import assignment.moneytap.com.wikipedia.db.WikiDBManager;
 
 public class WikiApplication extends Application{
 
@@ -18,11 +19,13 @@ public class WikiApplication extends Application{
     public void onCreate() {
         super.onCreate();
         sInstance = this;
+        WikiDBManager.getInstance().open();
     }
 
     @Override
     public void onTerminate() {
         super.onTerminate();
         QueryManager.getInstance().delete();
+        WikiDBManager.getInstance().close();
     }
 }

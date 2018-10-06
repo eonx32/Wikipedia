@@ -1,4 +1,4 @@
-package assignment.moneytap.com.wikipedia.helper;
+package assignment.moneytap.com.wikipedia.db;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -7,14 +7,14 @@ import android.database.sqlite.SQLiteOpenHelper;
 import assignment.moneytap.com.wikipedia.Util.PageORM;
 import assignment.moneytap.com.wikipedia.Util.WikiLog;
 
-public class DatabaseWrapper extends SQLiteOpenHelper {
+public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "DatabaseWrapper";
 
     private static final String DATABASE_NAME = "WikiInfo.db";
     private static final int DATABASE_VERSION = 1;
 
-    public DatabaseWrapper(Context context) {
+    public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -26,7 +26,6 @@ public class DatabaseWrapper extends SQLiteOpenHelper {
         WikiLog.d(TAG, "Creating database [" + DATABASE_NAME + " v." + DATABASE_VERSION + "]...");
 
         sqLiteDatabase.execSQL(PageORM.SQL_CREATE_TABLE);
-        sqLiteDatabase.close();
     }
 
     /**

@@ -16,7 +16,7 @@ import android.webkit.WebViewClient;
 import java.io.InputStream;
 
 import assignment.moneytap.com.wikipedia.R;
-import assignment.moneytap.com.wikipedia.Util.WikiAppUtil;
+import assignment.moneytap.com.wikipedia.Util.WikiConstants.ColumnType;
 import assignment.moneytap.com.wikipedia.Util.WikiLog;
 import assignment.moneytap.com.wikipedia.app.WikiApplication;
 
@@ -30,9 +30,9 @@ public class WikiPageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_wiki_page);
 
         Intent intent = getIntent();
-        String url = intent.getStringExtra("url");
-        String title = intent.getStringExtra("title");
-        String icon = intent.getStringExtra("icon");
+        String url = intent.getStringExtra(ColumnType.URL.toString());
+        String title = intent.getStringExtra(ColumnType.TITLE.toString());
+        String icon = intent.getStringExtra(ColumnType.ICON.toString());
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(title);
