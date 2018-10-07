@@ -63,9 +63,9 @@ public class WikiPageActivity extends AppCompatActivity {
             super.onBackPressed();
     }
 
-    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+    private static class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         ActionBar actionBar;
-        public DownloadImageTask(ActionBar actionBar) {
+        DownloadImageTask(ActionBar actionBar) {
             this.actionBar = actionBar;
         }
 
@@ -82,17 +82,19 @@ public class WikiPageActivity extends AppCompatActivity {
             return bmp;
         }
         protected void onPostExecute(Bitmap result) {
-            Bitmap bitmap = getResizedBitmap(result, 96, 96);
+            if(result == null)
+                return ;
+            Bitmap bitmap = getResizedBitmap(result);
             Drawable drawable = new BitmapDrawable(
                     WikiApplication.getInstance().getResources(), bitmap);
             actionBar.setLogo(drawable);
         }
 
-        public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+        Bitmap getResizedBitmap(Bitmap bm) {
             int width = bm.getWidth();
             int height = bm.getHeight();
-            float scaleWidth = ((float) newWidth) / width;
-            float scaleHeight = ((float) newHeight) / height;
+            float scaleWidth = (96f) / width;
+            float scaleHeight = (96f) / height;
             // CREATE A MATRIX FOR THE MANIPULATION
             Matrix matrix = new Matrix();
             // RESIZE THE BIT MAP

@@ -1,22 +1,21 @@
 package assignment.moneytap.com.wikipedia.activity;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.support.v7.widget.SearchView;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
 
 import assignment.moneytap.com.wikipedia.R;
 import assignment.moneytap.com.wikipedia.Util.PageORM;
 import assignment.moneytap.com.wikipedia.Util.WikiConstants.ColumnType;
-import assignment.moneytap.com.wikipedia.Util.WikiLog;
 import assignment.moneytap.com.wikipedia.client.QueryManager;
 import assignment.moneytap.com.wikipedia.data.Page;
 import assignment.moneytap.com.wikipedia.data.Response;
@@ -24,21 +23,26 @@ import assignment.moneytap.com.wikipedia.view.CachedPageAdapter;
 import assignment.moneytap.com.wikipedia.view.SuggestionAdapter;
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener,
-        QueryManager.OnResponseListener, SearchView.OnSuggestionListener, ListView.OnItemClickListener {
+        QueryManager.OnResponseListener, SearchView.OnSuggestionListener, View.OnClickListener,
+        CachedPageAdapter.OnItemClickListener{
 
     private static final String TAG = "MainActivity";
 
+    private MenuItem searchItem;
     private SearchView searchView;
     private QueryManager queryManager;
-    private ListView listView;
+    private RecyclerView recyclerView;
+    private FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         queryManager = QueryManager.getInstance();
-        listView = findViewById(R.id.cache_list);
-        listView.setOnItemClickListener(this);
+        recyclerView = findViewById(R.id.cache_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        fab = findViewById(R.id.search);
+        fab.setOnClickListener(this);
     }
 
     @Override
@@ -49,10 +53,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     }
 
     private void initCachedList() {
-        Context context = getApplicationContext();
-        CachedPageAdapter cachedPageAdapter = new CachedPageAdapter(
-                context, PageORM.getPages());
-        listView.setAdapter(cachedPageAdapter);
+        CachedPageAdapter cachedPageAdapter = new CachedPageAdapter(PageORM.getPages(), this);
+        recyclerView.setAdapter(cachedPageAdapter);
     }
 
     protected void onStop() {
@@ -66,23 +68,26 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         inflater.inflate(R.menu.search_menu, menu);
 
         // Init searchView and set listeners
-        MenuItem searchItem = menu.findItem(R.id.search);
+        searchItem = menu.findItem(R.id.search);
+        searchItem.setVisible(false);
         searchView = (SearchView) searchItem.getActionView();
         searchView.setQueryHint(getString(R.string.search_title));
         searchView.setOnQueryTextListener(this);
         searchView.setOnSuggestionListener(this);
+        searchView.setSuggestionsAdapter(new SuggestionAdapter(
+                getApplicationContext(), null, this));
 
         return true;
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
+        queryManager.scheduleQuery(QueryManager.SEND_QUERY, query);
         return false;
     }
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        WikiLog.e(TAG, newText);
         queryManager.scheduleQuery(QueryManager.SEND_QUERY, newText);
         return false;
     }
@@ -114,31 +119,34 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     }
 
     @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        Page page = (Page)adapterView.getItemAtPosition(i);
-        Intent intent = new Intent(getApplicationContext(), WikiPageActivity.class);
-        intent.putExtra(ColumnType.URL.toString(), page.getUrl());
-        intent.putExtra(ColumnType.TITLE.toString(), page.getTitle());
-        intent.putExtra(ColumnType.ICON.toString(), page.getThumbnail().getSource());
-        startActivity(intent);
+    public void onClick(View view) {
+        if(searchItem.isActionViewExpanded())
+            searchItem.collapseActionView();
+        else searchItem.expandActionView();
     }
 
     @Override
     public void onResponseReceived(int what, Response response) {
-        WikiLog.e(TAG, response.toString());
         switch (what) {
             case QueryManager.SEND_QUERY: {
                 final Cursor cursor = PageORM.getCursor(response);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        SuggestionAdapter suggestionAdapter = new SuggestionAdapter(
-                                getApplicationContext(), cursor, false);
-                        searchView.setSuggestionsAdapter(suggestionAdapter);
+                        searchView.getSuggestionsAdapter().swapCursor(cursor);
                     }
                 });
             }
             break;
         }
+    }
+
+    @Override
+    public void onItemClick(int position, Page page) {
+        Intent intent = new Intent(getApplicationContext(), WikiPageActivity.class);
+        intent.putExtra(ColumnType.URL.toString(), page.getUrl());
+        intent.putExtra(ColumnType.TITLE.toString(), page.getTitle());
+        intent.putExtra(ColumnType.ICON.toString(), page.getThumbnail().getSource());
+        startActivity(intent);
     }
 }

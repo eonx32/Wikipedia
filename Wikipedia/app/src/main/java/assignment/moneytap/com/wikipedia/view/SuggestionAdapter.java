@@ -1,5 +1,6 @@
 package assignment.moneytap.com.wikipedia.view;
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -18,11 +19,15 @@ import java.io.InputStream;
 import assignment.moneytap.com.wikipedia.R;
 import assignment.moneytap.com.wikipedia.Util.WikiConstants.ColumnType;
 import assignment.moneytap.com.wikipedia.Util.WikiLog;
+import assignment.moneytap.com.wikipedia.client.DownloadImageTask;
 
 public class SuggestionAdapter extends CursorAdapter {
 
-    public SuggestionAdapter(Context context, Cursor c, boolean autoRequery) {
-        super(context, c, autoRequery);
+    private Activity activity;
+
+    public SuggestionAdapter(Context context, Cursor c, Activity activity) {
+        super(context, c, false);
+        this.activity = activity;
     }
 
     @Override
@@ -40,7 +45,7 @@ public class SuggestionAdapter extends CursorAdapter {
         SuggestionHolder holder = new SuggestionHolder(view);
 
         String imageUrl = cursor.getString(ColumnType.ICON.ordinal());
-        new DownloadImageTask(holder.icon).execute(imageUrl);
+        new DownloadImageTask().execute(new DownloadImageTask.MyIcon(imageUrl, holder.icon, activity));
         holder.title.setText(cursor.getString(ColumnType.TITLE.ordinal()));
         holder.desc.setText(cursor.getString(ColumnType.DESC.ordinal()));
     }
@@ -57,32 +62,6 @@ public class SuggestionAdapter extends CursorAdapter {
             icon = itemView.findViewById(R.id.icon);
             title = itemView.findViewById(R.id.title);
             desc = itemView.findViewById(R.id.desc);
-        }
-    }
-
-    private static class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-
-        private ImageView bmImage;
-
-        DownloadImageTask(ImageView bmImage) {
-            this.bmImage = bmImage;
-        }
-
-        protected Bitmap doInBackground(String... urls) {
-            String urldisplay = urls[0];
-            Bitmap bmp = null;
-            try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                bmp = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                WikiLog.e("Error", e.getMessage());
-                e.printStackTrace();
-            }
-            return bmp;
-        }
-        protected void onPostExecute(Bitmap result) {
-            if(result != null)
-                bmImage.setImageBitmap(result);
         }
     }
 }
